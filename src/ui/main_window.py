@@ -4,6 +4,7 @@ import threading
 import re
 from tkinter import messagebox
 from utils.csv_exporter import CsvExporter
+from datetime import datetime
 
 class MainWindow(customtkinter.CTk):
     def __init__(self):
@@ -104,8 +105,8 @@ class MainWindow(customtkinter.CTk):
         self.results_textbox.delete("1.0", "end")
         query = self.search_entry.get()
         author = self.author_entry.get()
-        start_date = self.start_date_entry.get()
-        end_date = self.end_date_entry.get()
+        start_date_str = self.start_date_entry.get()
+        end_date_str = self.end_date_entry.get()
         max_results = self.max_results_entry.get()
 
         # Build the search query string
@@ -114,11 +115,18 @@ class MainWindow(customtkinter.CTk):
             search_query.append(f"all:{query}")
         if author:
             search_query.append(f"au:{author}")
-        if start_date and end_date:
-            search_query.append(f"submittedDate:[{start_date} TO {end_date}]")
+        if start_date_str and end_date_str:
+            # Format dates to YYYYMMDD for arXiv API
+            formatted_start_date = datetime.strptime(start_date_str, "%Y-%m-%d").strftime("%Y%m%d")
+            formatted_end_date = datetime.strptime(end_date_str, "%Y-%m-%d").strftime("%Y%m%d")
+            search_query.append(f"submittedDate:[{formatted_start_date} TO {formatted_end_date}]")
 
         
-        self.current_results = self.arxiv_search.search(" AND ".join(search_query), max_results=int(max_results) if max_results else 10)
+        final_search_query = " AND ".join(search_query)
+        if not final_search_query:
+            final_search_query = "all"
+
+        self.current_results = self.arxiv_search.search(final_search_query, max_results=int(max_results) if max_results else 10)
         
         # Update the UI from the main thread
         self.after(0, self.update_results, self.current_results)
