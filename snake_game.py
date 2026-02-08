@@ -2,8 +2,8 @@ import pygame
 import random
 
 # --- Constants ---
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 400
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
 SNAKE_SIZE = 20
 FPS = 10
 
